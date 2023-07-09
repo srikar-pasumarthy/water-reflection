@@ -6,7 +6,7 @@ import {
   SphereGeometry,
   BufferGeometry,
   BufferAttribute,
-  MeshStandardMaterial,
+  MeshBasicMaterial,
   Mesh,
   DirectionalLight,
   AmbientLight,
@@ -17,9 +17,10 @@ import {
 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Reflector } from 'three/addons/objects/Reflector.js'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import Stats from 'stats-js'
 import LoaderManager from '@/js/managers/LoaderManager'
-import GUI from 'lil-gui'
 import vertexShader from '../glsl/main.vert'
 import fragmentShader from '../glsl/main.frag'
 
@@ -56,13 +57,12 @@ export default class MainScene {
     await LoaderManager.load(assets)
 
     this.setStats()
-    this.setGUI()
     this.setScene()
     this.setRender()
     this.setCamera()
     this.setControls()
 
-    this.setSphere()
+    this.setText()
     this.setLights()
     this.setReflector()
     this.setParticles()
@@ -107,10 +107,9 @@ export default class MainScene {
     const farPlane = 10000
 
     this.camera = new PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane)
-    this.camera.position.y = 5
-    this.camera.position.x = 5
+    this.camera.position.y = 2
+    this.camera.position.x = 1
     this.camera.position.z = 5
-    this.camera.lookAt(0, 0, 0)
 
     this.scene.add(this.camera)
   }
@@ -132,12 +131,34 @@ export default class MainScene {
    * with a Basic material
    * https://threejs.org/docs/?q=mesh#api/en/materials/MeshBasicMaterial
    */
-  setSphere() {
-    const geometry = new SphereGeometry(1, 32, 32)
-    const material = new MeshStandardMaterial({ color:0xffffff })
+  setText() {
+    const fontLoader = new FontLoader()
 
-    this.sphereMesh = new Mesh(geometry, material)
-    this.scene.add(this.sphereMesh)
+    fontLoader.load(
+        '/fonts/helvetiker_regular.typeface.json',
+        (font) =>
+        {
+          const textGeometry = new TextGeometry(
+            'Srikar Pasumarthy',
+            {
+                font: font,
+                size: 0.5,
+                height: 0.2,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 5
+            }
+          )
+          const textMaterial = new MeshBasicMaterial()
+          const text = new Mesh(textGeometry, textMaterial)
+          this.scene.add(text)
+          textGeometry.center()
+          textGeometry.translate(0, textGeometry.boundingBox.max.y, 0)
+        }
+    )
   }
 
   setLights() {
@@ -187,18 +208,6 @@ export default class MainScene {
     document.body.appendChild(this.stats.dom)
   }
 
-  setGUI() {
-    const titleEl = document.querySelector('.main-title')
-
-    const handleChange = () => {
-      if (gui){
-        this.sphereMesh.position.y = this.guiObj.y
-      }
-    }
-
-    const gui = new GUI()
-    gui.add(this.guiObj, 'y', -3, 3).onChange(handleChange)
-  }
   /**
    * List of events
    */
@@ -213,10 +222,10 @@ export default class MainScene {
 
     const positions = new Float32Array(count * 3) // Multiply by 3 because each position is composed of 3 values (x, y, z)
 
-    for(let i = 0; i < count; i++) // Multiply by 3 for same reason
+    for(let i = 0; i < count; i+=3) // Multiply by 3 for same reason
     {
         positions[i] = (Math.random() - 0.5) * 100 // Math.random() - 0.5 to have a random value between -0.5 and +0.5
-        positions[i+1] = (Math.random() + 20) * 10
+        positions[i+1] = (Math.random() + 1) * 5
         positions[i+2] = (Math.random() - 0.5) * 100
     }
 
@@ -244,7 +253,6 @@ export default class MainScene {
     if (this.controls) this.controls.update() // for damping
     this.renderer.render(this.scene, this.camera)
 
-    this.sphereMesh.position.y = Math.sin(time / 1000) + 3
     this.groundMirror.material.uniforms.time.value += 0.1
 
     this.stats.end()
