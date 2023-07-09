@@ -14,6 +14,8 @@ import {
   RepeatWrapping,
   PointsMaterial,
   Points,
+  ImageUtils,
+  PlaneGeometry,
 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Reflector } from 'three/addons/objects/Reflector.js'
@@ -52,6 +54,10 @@ export default class MainScene {
         name: 'waterdudv',
         texture: './img/waterdudv.jpg',
       },
+      {
+        name: 'picofme',
+        texture: './img/picofme.jpg'
+      }
     ]
 
     await LoaderManager.load(assets)
@@ -66,6 +72,7 @@ export default class MainScene {
     this.setLights()
     this.setReflector()
     this.setParticles()
+    this.setImage()
 
     this.handleResize()
 
@@ -107,9 +114,9 @@ export default class MainScene {
     const farPlane = 10000
 
     this.camera = new PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane)
-    this.camera.position.y = 2
+    this.camera.position.y = 2.5
     this.camera.position.x = 1
-    this.camera.position.z = 5
+    this.camera.position.z = 6
 
     this.scene.add(this.camera)
   }
@@ -198,6 +205,22 @@ export default class MainScene {
     this.scene.add(this.groundMirror)
   }
 
+  /**
+   * Adding an image.
+   */
+  setImage() {
+    const img = new MeshBasicMaterial({ 
+      map: LoaderManager.assets['picofme'].texture
+    });
+    img.map.needsUpdate = true; //ADDED
+
+    // plane
+    const plane = new Mesh(new PlaneGeometry(6.45/3, 8.6/3),img);
+    plane.overdraw = true;
+    plane.translateY(1.5)
+    plane.translateZ(-1)
+    this.scene.add(plane);
+  }
 
   /**
    * Build stats to display fps
@@ -216,6 +239,9 @@ export default class MainScene {
     this.draw(0)
   }
 
+  /**
+   * Adding Particles
+   */
   setParticles() {
     const particlesGeometry = new BufferGeometry()
     const count = 5000
@@ -224,9 +250,11 @@ export default class MainScene {
 
     for(let i = 0; i < count; i+=3) // Multiply by 3 for same reason
     {
+        const x = (Math.random() - 0.5) * 100
+        const z = (Math.random() - 0.5) * 100
         positions[i] = (Math.random() - 0.5) * 100 // Math.random() - 0.5 to have a random value between -0.5 and +0.5
-        positions[i+1] = (Math.random() + 1) * 5
-        positions[i+2] = (Math.random() - 0.5) * 100
+        positions[i+1] = (Math.random() + 1) * 6 - (x * 0.1)
+        positions[i+2] = z
     }
 
     particlesGeometry.setAttribute('position', new BufferAttribute(positions, 3))
@@ -249,6 +277,7 @@ export default class MainScene {
   draw = (time) => {
     // now: time in ms
     this.stats.begin()
+
 
     if (this.controls) this.controls.update() // for damping
     this.renderer.render(this.scene, this.camera)
