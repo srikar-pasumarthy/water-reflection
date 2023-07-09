@@ -3,13 +3,17 @@ import {
   WebGLRenderer,
   Scene,
   PerspectiveCamera,
-  Mesh,
   SphereGeometry,
+  BufferGeometry,
+  BufferAttribute,
   MeshStandardMaterial,
+  Mesh,
   DirectionalLight,
   AmbientLight,
   CircleGeometry,
   RepeatWrapping,
+  PointsMaterial,
+  Points,
 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Reflector } from 'three/addons/objects/Reflector.js'
@@ -61,6 +65,7 @@ export default class MainScene {
     this.setSphere()
     this.setLights()
     this.setReflector()
+    this.setParticles()
 
     this.handleResize()
 
@@ -203,7 +208,25 @@ export default class MainScene {
   }
 
   setParticles() {
+    const particlesGeometry = new BufferGeometry()
+    const count = 5000
+
+    const positions = new Float32Array(count * 3) // Multiply by 3 because each position is composed of 3 values (x, y, z)
+
+    for(let i = 0; i < count; i++) // Multiply by 3 for same reason
+    {
+        positions[i] = (Math.random() - 0.5) * 100 // Math.random() - 0.5 to have a random value between -0.5 and +0.5
+        positions[i+1] = (Math.random() + 20) * 10
+        positions[i+2] = (Math.random() - 0.5) * 100
+    }
+
+    particlesGeometry.setAttribute('position', new BufferAttribute(positions, 3))
+
+    const material = new PointsMaterial( {color: 0xffffff, size: 0.1 } )
     
+    const mesh = new Points(particlesGeometry, material)
+
+    this.scene.add(mesh)
   }
 
   // EVENTS

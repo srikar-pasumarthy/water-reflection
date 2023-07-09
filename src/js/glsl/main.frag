@@ -10,7 +10,7 @@ void main() {
 
 	#include <logdepthbuf_fragment>
 
-	float waveStrength = 0.5;
+	float waveStrength = 0.1;
 	float waveSpeed = 0.03;
 
 	// simple distortion (ripple) via dudv map (see https://www.youtube.com/watch?v=6B7IF6GOu7s)
