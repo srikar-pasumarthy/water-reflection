@@ -3,7 +3,6 @@ import {
   WebGLRenderer,
   Scene,
   PerspectiveCamera,
-  SphereGeometry,
   BufferGeometry,
   BufferAttribute,
   MeshBasicMaterial,
@@ -14,7 +13,6 @@ import {
   RepeatWrapping,
   PointsMaterial,
   Points,
-  ImageUtils,
   PlaneGeometry,
   ShaderMaterial,
   Vector3,
@@ -23,16 +21,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Reflector } from 'three/addons/objects/Reflector.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import Stats from 'stats-js'
 import LoaderManager from '@/js/managers/LoaderManager'
 import vertexShader from '../glsl/main.vert'
 import fragmentShader from '../glsl/main.frag'
 
 export default class MainScene {
-  composer
   canvas
   renderer
   scene
@@ -212,78 +206,6 @@ export default class MainScene {
     this.groundMirror.position.y = 0
     this.groundMirror.rotateX(-Math.PI / 2)
     this.scene.add(this.groundMirror)
-  }
-
-  /**
-   * Building the Northern Lights
-   */
-  setNorthernLights() {
-    const planeGeometry = new PlaneGeometry(100, 100);
-
-    // Define the vertex shader
-    const vertexShader = `
-      varying vec2 vUv;
-    
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `;
-    
-    // Define the fragment shader
-    const fragmentShader = `
-      varying vec2 vUv;
-    
-      void main() {
-        vec3 color = vec3(0.0);
-    
-        // Calculate the color based on the UV coordinates
-        color.r = sin(vUv.x * 10.0) * 0.5 + 0.5;
-        color.g = sin(vUv.y * 10.0) * 0.5 + 0.5;
-        color.b = sin((vUv.x + vUv.y) * 10.0) * 0.5 + 0.5;
-    
-        gl_FragColor = vec4(color, 1.0);
-      }
-    `;
-
-    // Create the material using the vertex and fragment shaders
-    const material = new ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-    });
-
-    // Create the plane mesh with the material
-    const planeMesh = new Mesh(planeGeometry, material);
-    this.scene.add(planeMesh);
-    planeMesh.position.y += 30
-    planeMesh.rotateOnAxis(new Vector3(1, 0, 0), Math.PI/2)
-
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
-
-    // Add a custom shader pass
-    const customPass = new ShaderPass({
-      uniforms: {},
-      vertexShader: `
-        varying vec2 vUv;
-
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D tDiffuse;
-        varying vec2 vUv;
-
-        void main() {
-          vec4 textureColor = texture2D(tDiffuse, vUv);
-          gl_FragColor = textureColor;
-        }
-      `
-    });
-    customPass.renderToScreen = true;
-    this.composer.addPass(customPass);
   }
   
 
