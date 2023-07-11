@@ -128,15 +128,18 @@ export default class MainScene {
   setControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enableDamping = true
-    // this.controls.dampingFactor = 0.04
+    this.controls.maxPolarAngle = Math.PI / 2.05
+    this.controls.maxAzimuthAngle = Math.PI / 2
+    this.controls.minAzimuthAngle = -Math.PI / 2
+    this.controls.maxDistance = 25
+    this.controls.minDistance = 2
+    this.controls.enablePan = false
+    this.controls.update()
   }
 
 
   /**
-   * Create a SphereGeometry
-   * https://threejs.org/docs/?q=box#api/en/geometries/SphereGeometry
-   * with a Basic material
-   * https://threejs.org/docs/?q=mesh#api/en/materials/MeshBasicMaterial
+   * Add some Text to the scene
    */
   setText() {
     const fontLoader = new FontLoader()
