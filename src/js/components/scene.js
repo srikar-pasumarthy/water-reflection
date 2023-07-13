@@ -248,7 +248,7 @@ export default class MainScene {
    */
   setParticles() {
     const particlesGeometry = new BufferGeometry()
-    const count = 5000
+    const count = 10000
 
     const positions = new Float32Array(count * 3) // Multiply by 3 because each position is composed of 3 values (x, y, z)
 
@@ -256,8 +256,8 @@ export default class MainScene {
     {
         const x = (Math.random() - 0.5) * 100
         const z = (Math.random() - 0.5) * 100
-        positions[i] = (Math.random() - 0.5) * 100 // Math.random() - 0.5 to have a random value between -0.5 and +0.5
-        positions[i+1] = (Math.random() + 1) * 6 - (x * 0.1)
+        positions[i] = x // Math.random() - 0.5 to have a random value between -0.5 and +0.5
+        positions[i+1] = Math.sqrt(1800-(Math.pow(x,2)+Math.pow(z,2)))
         positions[i+2] = z
     }
 
